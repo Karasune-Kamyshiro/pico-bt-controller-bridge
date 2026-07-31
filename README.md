@@ -1,39 +1,40 @@
 # Pico BT Controller
 
-Verwandelt einen Raspberry Pi Pico 2 W in eine eigenständige Bluetooth-zu-USB-Brücke für
-Gamepads (DualSense, DualShock, Xbox Wireless, 8BitDo, generische HID-Controller, ...).
+Turns a Raspberry Pi Pico 2 W into a standalone Bluetooth-to-USB bridge for
+gamepads (DualSense, DualShock, Xbox Wireless, 8BitDo, generic HID controllers, ...).
 
-Bis zu **4 Controller gleichzeitig**, jeder erscheint am PC als eigenes USB-Gamepad
-(`/dev/input/js0` .. `js3`). Kein Treiber, kein Hintergrundprozess auf dem PC nötig –
-der Pico erledigt alles selbst.
+Supports up to **4 simultaneous controllers**, each showing up on the PC as its own
+USB gamepad (`/dev/input/js0` .. `js3`). No driver, no background process needed on
+the PC side — the Pico handles everything on its own.
 
 ## Features
 
-- Bis zu 4 gleichzeitige Bluetooth-Controller, jeweils als eigenständiges USB-HID-Gamepad
-- **USB Remote Wakeup**: weckt den PC aus dem Suspend, sobald ein bereits gekoppelter
-  Controller sich wieder verbindet (z. B. durch Tastendruck)
-- Controller trennen sich automatisch, sobald der PC in den Suspend geht (spart Akku,
-  sorgt für einen sauberen Reconnect beim nächsten Aufwecken)
-- Player-LED am Controller zeigt die zugewiesene Spielernummer (sofern vom
-  Controller-Treiber unterstützt, z. B. DualSense, 8BitDo SN30 Pro)
-- Pairing-Modus lässt sich jederzeit per Tastenkombo neu öffnen (Start+Select 3s
-  halten), auch wenn schon Controller verbunden sind – kein Neustart nötig
-- Dynamische USB-Interface-Anzahl: nur so viele Interfaces sichtbar wie tatsächlich
-  Controller verbunden sind (statt immer fix 4)
-- Status-LED: blinkt beim Suchen nach Controllern, leuchtet dauerhaft sobald mindestens
-  einer verbunden ist
+- Up to 4 simultaneous Bluetooth controllers, each exposed as an independent USB HID
+  gamepad
+- **USB Remote Wakeup**: wakes the PC from suspend as soon as an already-paired
+  controller reconnects (e.g. via a button press)
+- Controllers automatically disconnect once the PC goes into suspend (saves battery,
+  ensures a clean reconnect on the next wake)
+- Player LED on the controller reflects its assigned player slot (if supported by the
+  controller driver, e.g. DualSense, 8BitDo SN30 Pro)
+- Pairing mode can be reopened at any time via a button combo (hold Start+Select for
+  3s), even while other controllers are already connected — no reboot needed
+- Dynamic USB interface count: only as many USB interfaces are exposed as controllers
+  are actually connected (instead of always exposing 4)
+- Status LED: blinks while searching for controllers, stays solid once at least one
+  is connected
 
 ## Hardware
 
-- Raspberry Pi Pico 2 W (RP2350, WLAN/BT-Chip zwingend erforderlich)
-- USB-Kabel zum PC
+- Raspberry Pi Pico 2 W (RP2350, onboard WiFi/BT chip required)
+- USB cable to the PC
 
-## Voraussetzungen
+## Requirements
 
-- **Pico SDK 2.1.1** (nicht `master`/neuere Versionen!) – neuere Pico-SDK-Releases
-  bringen eine BTstack-Version mit, die inkompatible API-Änderungen gegenüber dem hier
-  verwendeten Bluepad32-Stand hat (`hids_client_*` wurde zu `hids_host_*` umbenannt).
-  Mit Pico SDK 2.1.1 ist das Projekt getestet und funktioniert zuverlässig.
+- **Pico SDK 2.1.1** (not `master`/newer versions!) — newer Pico SDK releases bundle a
+  BTstack version with breaking API changes relative to the Bluepad32 version used
+  here (`hids_client_*` was renamed to `hids_host_*`). This project is tested and
+  works reliably with Pico SDK 2.1.1.
 - ARM GNU Toolchain (`arm-none-eabi-gcc` + `gdb`)
 - CMake, Python 3
 
@@ -43,67 +44,66 @@ cd pico-sdk-2.1.1
 git submodule update --init --recursive
 ```
 
-Falls beim Bauen mit sehr neuen Host-Compilern (GCC 15+) Fehler im `pioasm`-Build-Tool
-auftreten (fehlende `<cstdint>`-Includes), hilft folgender Patch:
+If building with a very recent host compiler (GCC 15+) fails inside the `pioasm`
+build tool (missing `<cstdint>` includes), apply this patch:
 
 ```bash
 sed -i '1i #include <cstdint>' pico-sdk-2.1.1/tools/pioasm/output_format.h
 sed -i '1i #include <cstdint>' pico-sdk-2.1.1/tools/pioasm/pio_types.h
 ```
 
-## Bauen
+## Building
 
 ```bash
-git clone --recursive https://github.com/Karasune-Kamyshiro/pico-bt-controller.git
+git clone --recursive https://github.com/<your-username>/pico-bt-controller.git
 cd pico-bt-controller
 mkdir build && cd build
-cmake -DPICO_BOARD=pico2_w -DPICO_SDK_PATH=/pfad/zu/pico-sdk-2.1.1 ..
+cmake -DPICO_BOARD=pico2_w -DPICO_SDK_PATH=/path/to/pico-sdk-2.1.1 ..
 make -j$(nproc)
 ```
 
-Erzeugt `pico_bt_controller.uf2`.
+Produces `pico_bt_controller.uf2`.
 
-## Flashen
+## Flashing
 
-Pico bei gedrückter **BOOTSEL**-Taste per USB anschließen (meldet sich als
-Massenspeicher `RPI-RP2`), dann:
+Connect the Pico via USB while holding **BOOTSEL** (it mounts as a mass storage
+device named `RPI-RP2`), then:
 
 ```bash
 cp pico_bt_controller.uf2 /run/media/$USER/RPI-RP2/
 ```
 
-Der Pico startet automatisch neu.
+The Pico reboots automatically.
 
-## Benutzung
+## Usage
 
-1. Pico an den PC anschließen (bleibt dauerhaft angeschlossen)
-2. Controller in den Bluetooth-Pairing-Modus bringen – der Pico ist beim ersten Start
-   automatisch discoverable und verbindet sich selbstständig
-3. Danach reicht am Controller ein Tastendruck (z. B. PS-Taste), um sich erneut zu
-   verbinden – das weckt bei Bedarf auch den PC aus dem Suspend
-4. **Neuen Pairing-Modus öffnen** (z. B. für einen weiteren Controller, wenn schon
-   welche verbunden sind): am Controller **Start + Select 3 Sekunden halten**, LED
-   am Pico blinkt zur Bestätigung
+1. Plug the Pico into the PC (leave it connected permanently)
+2. Put a controller into Bluetooth pairing mode — the Pico is discoverable on first
+   boot and connects automatically
+3. After that, a single button press on the controller (e.g. the PS button)
+   reconnects it — this also wakes the PC from suspend if needed
+4. **To open pairing mode again** (e.g. to add another controller while others are
+   already connected): hold **Start + Select for 3 seconds** on any connected
+   controller. The Pico's LED blinks to confirm.
 
-## Bekannte Einschränkungen
+## Known limitations
 
-- Analoge Trigger (L2/R2) werden sowohl als Achse als auch als digitaler Button
-  gemeldet – für Spiele/Anwendungen, die nur eines von beidem erwarten, kann das
-  redundant wirken, ist aber kein Fehler
-- Player-LED-Steuerung hängt vom jeweiligen Controller-Treiber in Bluepad32 ab –
-  nicht jeder unterstützte Controller-Typ implementiert das (z. B. GuliKit KK3 Max
-  zeigt aktuell immer "Player 1")
-- Dynamische Interface-Umschaltung verursacht beim Verbinden/Trennen weiterer
-  Controller einen kurzen (~0,5s) USB-Reconnect-Ruckler für alle Controller,
-  bedingt durch einen vollständigen `tud_deinit()`/`tud_init()`-Zyklus
+- Analog triggers (L2/R2) are reported both as an axis and as a digital button —
+  redundant for apps that only expect one or the other, but not a bug
+- Player LED control depends on the individual controller driver inside Bluepad32 —
+  not every supported controller implements it (e.g. the GuliKit KK3 Max currently
+  always shows "Player 1")
+- Dynamically changing the USB interface count causes a brief (~0.5s) USB reconnect
+  blip for all controllers whenever another one connects or disconnects, due to a
+  full `tud_deinit()`/`tud_init()` cycle
 
-## Danke an
+## Credits
 
-- [Bluepad32](https://github.com/ricardoquesada/bluepad32) von Ricardo Quesada –
-  die eigentliche Bluetooth-Host-Bibliothek, auf der dieses Projekt aufbaut
-- [TinyUSB](https://github.com/hathach/tinyusb) für den USB-HID-Stack
+- [Bluepad32](https://github.com/ricardoquesada/bluepad32) by Ricardo Quesada — the
+  Bluetooth host library this project is built on
+- [TinyUSB](https://github.com/hathach/tinyusb) for the USB HID stack
 
-## Lizenz
+## License
 
-Eigener Code: [MIT](LICENSE) (oder nach Wahl anpassen)
-Bluepad32 (als Submodule eingebunden): Apache 2.0
+Own code: [MIT](LICENSE) (or adjust as preferred)
+Bluepad32 (included as a submodule): Apache 2.0
