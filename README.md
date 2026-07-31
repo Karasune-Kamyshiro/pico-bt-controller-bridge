@@ -1,3 +1,8 @@
+Don' hate me, this is completely Vibecoded but it works. please by all means: people who know what they are doing
+Fork it, correct it, upgrade it. But it Annoyed me that my SteamOS PC does not wake up with a Controller, no matter what Bluetooh dongle, 2,4GHz Dongle, PCIe card...
+So I...or Claude made this
+
+
 # Pico BT Controller
 
 Turns a Raspberry Pi Pico 2 W into a standalone Bluetooth-to-USB bridge for
@@ -55,7 +60,7 @@ sed -i '1i #include <cstdint>' pico-sdk-2.1.1/tools/pioasm/pio_types.h
 ## Building
 
 ```bash
-git clone --recursive https://github.com/<your-username>/pico-bt-controller.git
+git clone --recursive https://github.com/Karasune-Kamyshiro/pico-bt-controller.git
 cd pico-bt-controller
 mkdir build && cd build
 cmake -DPICO_BOARD=pico2_w -DPICO_SDK_PATH=/path/to/pico-sdk-2.1.1 ..
