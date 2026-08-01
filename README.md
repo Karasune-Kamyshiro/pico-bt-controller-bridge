@@ -3,7 +3,7 @@ Fork it, correct it, upgrade it. But it Annoyed me that my SteamOS PC does not w
 So I...or Claude made this
 
 
-# Pico BT Controller
+# Pico BT Controller Bridge
 
 Turns a Raspberry Pi Pico 2 W into a standalone Bluetooth-to-USB bridge for
 gamepads (DualSense, DualShock, Xbox Wireless, 8BitDo, generic HID controllers, ...).
