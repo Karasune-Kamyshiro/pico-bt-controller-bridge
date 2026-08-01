@@ -1,4 +1,4 @@
-# Pico BT Controller
+# Pico BT Controller Bridge
 
 Verwandelt einen Raspberry Pi Pico 2 W in eine eigenständige Bluetooth-zu-USB-Brücke für
 Gamepads (DualSense, DualShock, Xbox Wireless, 8BitDo, generische HID-Controller, ...).
