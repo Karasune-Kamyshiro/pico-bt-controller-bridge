@@ -108,8 +108,8 @@ void usb_descriptors_set_active_interfaces(uint8_t n) {
 //--------------------------------------------------------------------+
 char const* string_desc_arr[] = {
     (const char[]){0x09, 0x04}, // 0: Sprache (Englisch/US)
-    "Pico BT Controller",       // 1: Manufacturer
-    "Pico BT Controller",       // 2: Product
+    "Pico",                     // 1: Manufacturer
+    "BT Controller Bridge",     // 2: Product (lsusb zeigt Manufacturer+Product zusammen)
     "0001",                     // 3: Serial
 };
 
