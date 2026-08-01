@@ -1,0 +1,10 @@
+[Unit]
+Description=TV einschalten nach Resume
+After=suspend.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/deck/bin/tv-suspend.sh on
+
+[Install]
+WantedBy=suspend.target

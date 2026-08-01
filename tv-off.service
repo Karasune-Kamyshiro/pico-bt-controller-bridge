@@ -1,0 +1,10 @@
+[Unit]
+Description=TV ausschalten vor Suspend
+Before=sleep.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/deck/bin/tv-suspend.sh off
+
+[Install]
+WantedBy=sleep.target
